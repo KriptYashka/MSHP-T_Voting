@@ -4,10 +4,10 @@
     {% include 'base/head.html' %}
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
 {% include 'base/header.html' %}
 
-<main>
+<main class="flex-grow-1">
     {% if messages %}
         <div class="container mt-3">
             {% for message in messages %}
@@ -23,7 +23,7 @@
     {% endblock %}
 </main>
 
-<footer>
+<footer class="mt-auto">
     {% include 'base/footer.html' %}
 </footer>
 
