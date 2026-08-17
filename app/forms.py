@@ -58,3 +58,21 @@ class ProjectCreateForm(forms.Form):
         self.fields['owner'].queryset = User.objects.filter(
             profile__role=Role.DEVELOPER,
         ).exclude(project__isnull=False)
+
+
+class ProfilePasswordForm(forms.Form):
+    new_password = forms.CharField(
+        label='Новый пароль',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        min_length=6,
+    )
+    confirm_password = forms.CharField(
+        label='Подтвердите пароль',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('new_password') != cleaned.get('confirm_password'):
+            raise forms.ValidationError('Пароли не совпадают')
+        return cleaned

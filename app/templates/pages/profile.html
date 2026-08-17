@@ -1,0 +1,61 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 520px;">
+    <h1 class="mb-4">Профиль</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <table class="table table-borderless mb-0">
+                <tr>
+                    <th class="text-muted" style="width:160px;">Логин</th>
+                    <td>{{ user.username }}</td>
+                </tr>
+                <tr>
+                    <th class="text-muted">ФИО</th>
+                    <td>{{ profile.full_name|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th class="text-muted">Возраст</th>
+                    <td>{{ profile.age|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th class="text-muted">Роль</th>
+                    <td>{{ profile.get_role_display }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <h5 class="mb-3">Смена пароля</h5>
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label" for="id_new_password">Новый пароль</label>
+            <input type="password" name="new_password" id="id_new_password"
+                   class="form-control{% if form.new_password.errors %} is-invalid{% endif %}"
+                   minlength="6" required>
+            {% for e in form.new_password.errors %}
+                <div class="invalid-feedback">{{ e }}</div>
+            {% endfor %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="id_confirm_password">Подтвердите пароль</label>
+            <input type="password" name="confirm_password" id="id_confirm_password"
+                   class="form-control{% if form.confirm_password.errors %} is-invalid{% endif %}"
+                   required>
+            {% for e in form.confirm_password.errors %}
+                <div class="invalid-feedback">{{ e }}</div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary">Сменить пароль</button>
+    </form>
+</div>
+{% endblock %}

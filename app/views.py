@@ -11,7 +11,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .consumers import broadcast_voting
-from .forms import NominationCreateForm, ProjectCreateForm, UserCreateForm, UserEditForm
+from .forms import (
+    NominationCreateForm, ProfilePasswordForm, ProjectCreateForm,
+    UserCreateForm, UserEditForm,
+)
 from .models import (
     Nomination, Profile, Project, ProjectScreenshot, Role, Vote, VotingState,
 )
@@ -70,6 +73,28 @@ def login_page(request):
 def logout_page(request):
     logout(request)
     return redirect('login')
+
+
+@login_required
+def profile_page(request):
+    user = request.user
+    profile = getattr(user, 'profile', None)
+
+    if request.method == 'POST':
+        form = ProfilePasswordForm(request.POST)
+        if form.is_valid():
+            user.set_password(form.cleaned_data['new_password'])
+            user.save()
+            login(request, user)
+            messages.success(request, 'Пароль успешно изменён')
+            return redirect('profile')
+    else:
+        form = ProfilePasswordForm()
+
+    return render(request, 'pages/profile.html', {
+        'profile': profile,
+        'form': form,
+    })
 
 
 @login_required

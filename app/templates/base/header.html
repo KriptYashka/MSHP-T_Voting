@@ -35,7 +35,7 @@
     </ul>
     <ul class="nav nav-pills nav-header">
         {% if user.is_authenticated %}
-            <li class="nav-item"><span class="nav-link text-white disabled">{{ user.username }}</span></li>
+            <li class="nav-item"><a href="{% url 'profile' %}" class="nav-link text-white">{{ user.username }}</a></li>
             <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link text-white">Выйти</a></li>
         {% else %}
             <li class="nav-item"><a href="{% url 'login' %}" class="nav-link text-white">Войти в систему</a></li>
