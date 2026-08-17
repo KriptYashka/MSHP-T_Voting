@@ -153,7 +153,8 @@ def project_detail(request, project_id):
     )
     role = get_role(request.user)
     is_owner = hasattr(request.user, 'project') and request.user.project.id == project.id
-    can_upload = role == Role.ADMIN or is_owner
+    can_upload = role == Role.ADMIN or (is_owner and not project.locked)
+    can_edit = role == Role.ADMIN or (is_owner and not project.locked)
 
     if request.method == 'POST' and can_upload:
         file = request.FILES.get('image')
@@ -170,6 +171,7 @@ def project_detail(request, project_id):
     return render(request, 'pages/project_detail.html', {
         'project': project,
         'can_upload': can_upload,
+        'can_edit': can_edit,
     })
 
 
@@ -196,7 +198,11 @@ def project_edit(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     role = get_role(request.user)
     is_owner = hasattr(request.user, 'project') and request.user.project.id == project.id
-    if not (role == Role.ADMIN or is_owner):
+    if role == Role.ADMIN:
+        pass
+    elif is_owner and not project.locked:
+        pass
+    else:
         raise PermissionDenied
 
     if request.method == 'POST':
@@ -455,6 +461,15 @@ def admin_panel(request):
                     messages.success(request, f'Пользователь {target.username} обновлён')
                 else:
                     messages.error(request, 'Пользователь не найден')
+
+        elif action == 'toggle_lock':
+            project_id = request.POST.get('project_id')
+            project = Project.objects.filter(id=project_id).first()
+            if project:
+                project.locked = not project.locked
+                project.save()
+                status = 'заблокирован' if project.locked else 'разблокирован'
+                messages.success(request, f'Проект «{project.title}» {status}')
 
         return redirect('admin_panel')
 

@@ -72,16 +72,29 @@
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
                                     {{ project.title }}
+                                    {% if project.locked %}
+                                        <span class="badge bg-warning text-dark ms-1">Заблокирован</span>
+                                    {% endif %}
                                     <div class="text-muted small">{{ project.owner.profile.full_name|default:project.owner.username }}</div>
                                 </div>
-                                <form method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="set_current_project">
-                                    <input type="hidden" name="project_id" value="{{ project.id }}">
-                                    <button type="submit" class="btn btn-sm {% if current_project.id == project.id %}btn-success{% else %}btn-outline-primary{% endif %}">
-                                        {% if current_project.id == project.id %}Голосуется{% else %}Показывать{% endif %}
-                                    </button>
-                                </form>
+                                <div class="d-flex gap-1">
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="toggle_lock">
+                                        <input type="hidden" name="project_id" value="{{ project.id }}">
+                                        <button type="submit" class="btn btn-sm {% if project.locked %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                                            {% if project.locked %}Разблокировать{% else %}Заблокировать{% endif %}
+                                        </button>
+                                    </form>
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="set_current_project">
+                                        <input type="hidden" name="project_id" value="{{ project.id }}">
+                                        <button type="submit" class="btn btn-sm {% if current_project.id == project.id %}btn-success{% else %}btn-outline-primary{% endif %}">
+                                            {% if current_project.id == project.id %}Голосуется{% else %}Показывать{% endif %}
+                                        </button>
+                                    </form>
+                                </div>
                             </li>
                         {% empty %}
                             <li class="list-group-item text-muted">Проектов пока нет.</li>

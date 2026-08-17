@@ -14,8 +14,10 @@
         <div class="card-body">
             <div class="d-flex align-items-center gap-3">
                 <h1 class="card-title mb-0">{{ project.title }}</h1>
-                {% if can_upload %}
+                {% if can_edit %}
                     <a href="{% url 'project_edit' project.id %}" class="btn btn-outline-secondary btn-sm">Редактировать</a>
+                {% elif project.locked %}
+                    <span class="badge bg-warning text-dark">Заблокировано</span>
                 {% endif %}
             </div>
             <p class="text-muted">

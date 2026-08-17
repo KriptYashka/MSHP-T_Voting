@@ -60,6 +60,7 @@ class Project(models.Model):
     )
     title = models.CharField('Название', max_length=255)
     description = models.TextField('Описание')
+    locked = models.BooleanField('Заблокирован', default=False)
     created_at = models.DateTimeField('Добавлен', auto_now_add=True)
 
     class Meta:
