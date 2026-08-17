@@ -42,8 +42,13 @@
     </div>
 
     {% if can_upload %}
+        {% with count=project.screenshots.count %}
         <div class="card shadow-sm mb-4">
-            <div class="card-header">Добавить скриншот</div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Скриншоты</span>
+                <small class="text-muted">{{ count }}/5</small>
+            </div>
+            {% if count < 5 %}
             <div class="card-body">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
@@ -53,7 +58,13 @@
                     </div>
                 </form>
             </div>
+            {% else %}
+            <div class="card-body">
+                <small class="text-muted">Достигнут лимит в 5 скриншотов</small>
+            </div>
+            {% endif %}
         </div>
+        {% endwith %}
     {% endif %}
 
     <div class="card shadow-sm">

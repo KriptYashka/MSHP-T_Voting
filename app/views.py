@@ -81,19 +81,47 @@ def profile_page(request):
     profile = getattr(user, 'profile', None)
 
     if request.method == 'POST':
-        form = ProfilePasswordForm(request.POST)
-        if form.is_valid():
-            user.set_password(form.cleaned_data['new_password'])
-            user.save()
-            login(request, user)
-            messages.success(request, 'Пароль успешно изменён')
-            return redirect('profile')
-    else:
-        form = ProfilePasswordForm()
+        form_type = request.POST.get('form_type')
 
+        if form_type == 'password':
+            pw_form = ProfilePasswordForm(request.POST)
+            age_val = request.POST.get('age', '').strip()
+            if pw_form.is_valid():
+                user.set_password(pw_form.cleaned_data['new_password'])
+                user.save()
+                login(request, user)
+                messages.success(request, 'Пароль успешно изменён')
+                return redirect('profile')
+            return render(request, 'pages/profile.html', {
+                'profile': profile,
+                'form': pw_form,
+                'age': age_val,
+            })
+
+        elif form_type == 'age' and profile is not None:
+            age_val = request.POST.get('age', '').strip()
+            if age_val:
+                try:
+                    age_int = int(age_val)
+                    if 1 <= age_int <= 150:
+                        profile.age = age_int
+                        profile.save()
+                        messages.success(request, 'Возраст обновлён')
+                    else:
+                        messages.error(request, 'Возраст должен быть от 1 до 150')
+                except ValueError:
+                    messages.error(request, 'Некорректный возраст')
+            else:
+                profile.age = None
+                profile.save()
+                messages.success(request, 'Возраст удалён')
+            return redirect('profile')
+
+    form = ProfilePasswordForm()
     return render(request, 'pages/profile.html', {
         'profile': profile,
         'form': form,
+        'age': profile.age if profile else '',
     })
 
 
@@ -130,8 +158,11 @@ def project_detail(request, project_id):
     if request.method == 'POST' and can_upload:
         file = request.FILES.get('image')
         if file:
-            ProjectScreenshot.objects.create(project=project, image=file)
-            messages.success(request, 'Скриншот загружен')
+            if project.screenshots.count() >= 5:
+                messages.error(request, 'Максимум 5 скриншотов на проект')
+            else:
+                ProjectScreenshot.objects.create(project=project, image=file)
+                messages.success(request, 'Скриншот загружен')
         else:
             messages.error(request, 'Выберите файл')
         return redirect('project_detail', project_id=project.id)

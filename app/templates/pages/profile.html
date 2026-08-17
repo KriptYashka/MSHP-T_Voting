@@ -27,6 +27,17 @@
         </div>
     </div>
 
+    <h5 class="mb-3">Возраст</h5>
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="age">
+        <div class="input-group" style="max-width: 220px;">
+            <input type="number" name="age" class="form-control" min="1" max="150"
+                   value="{{ age|default:'' }}" placeholder="Ваш возраст">
+            <button type="submit" class="btn btn-outline-primary">Сохранить</button>
+        </div>
+    </form>
+
     <h5 class="mb-3">Смена пароля</h5>
     {% if form.errors %}
         <div class="alert alert-danger">
@@ -37,6 +48,7 @@
     {% endif %}
     <form method="post">
         {% csrf_token %}
+        <input type="hidden" name="form_type" value="password">
         <div class="mb-3">
             <label class="form-label" for="id_new_password">Новый пароль</label>
             <input type="password" name="new_password" id="id_new_password"
