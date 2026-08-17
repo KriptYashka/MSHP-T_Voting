@@ -1,0 +1,84 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Оценка проектов</h1>
+    <p class="text-muted mb-4">Можно оценивать проекты в любое время, независимо от фазы голосования.</p>
+
+    {% for item in project_data %}
+        {% if item.project.id != own_project.id %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">{{ item.project.title }}</h5>
+                    <p class="text-muted small mb-3">Автор: {{ item.project.owner.profile.full_name|default:item.project.owner.username }}</p>
+
+                    <form method="post" class="row g-3 align-items-end">
+                        {% csrf_token %}
+                        <input type="hidden" name="project_id" value="{{ item.project.id }}">
+
+                        <div class="col-md-4">
+                            <label class="form-label small">Номинация</label>
+                            <select name="nomination_id" class="form-select form-select-sm">
+                                <option value="">— Без номинации —</option>
+                                {% for nom in nominations %}
+                                    <option value="{{ nom.id }}"
+                                        {% if item.vote and item.vote.nomination_id == nom.id %}selected{% endif %}>
+                                        {{ nom.title }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label small">Техническая</label>
+                            <select name="score_technical" class="form-select form-select-sm" required>
+                                <option value="">—</option>
+                                {% for v in scores_range %}
+                                    <option value="{{ v }}"
+                                        {% if item.vote and item.vote.score_technical == v %}selected{% endif %}>
+                                        {{ v }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label small">Эстетичность</label>
+                            <select name="score_aesthetics" class="form-select form-select-sm" required>
+                                <option value="">—</option>
+                                {% for v in scores_range %}
+                                    <option value="{{ v }}"
+                                        {% if item.vote and item.vote.score_aesthetics == v %}selected{% endif %}>
+                                        {{ v }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label small">Играбельность</label>
+                            <select name="score_playability" class="form-select form-select-sm" required>
+                                <option value="">—</option>
+                                {% for v in scores_range %}
+                                    <option value="{{ v }}"
+                                        {% if item.vote and item.vote.score_playability == v %}selected{% endif %}>
+                                        {{ v }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                {% if item.vote %}Обновить{% else %}Оценить{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    {% empty %}
+        <div class="alert alert-secondary">Проектов пока нет.</div>
+    {% endfor %}
+</div>
+{% endblock %}

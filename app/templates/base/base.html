@@ -1,0 +1,34 @@
+{% load static %}
+<html lang="en">
+<head>
+    {% include 'base/head.html' %}
+</head>
+
+<body>
+{% include 'base/header.html' %}
+
+<main>
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% block content %}
+    <h1>Отсутствует наполнение</h1>
+    {% endblock %}
+</main>
+
+<footer>
+    {% include 'base/footer.html' %}
+</footer>
+
+{% block extra_js %} {% endblock %}
+</body>
+
+
+</html>

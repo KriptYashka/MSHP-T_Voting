@@ -1,0 +1,106 @@
+[
+  {
+    "model": "auth.user",
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$PHUwGv15ph3gbA5t1jfASB$S3VYm1bu1lgOm82Xoa6okNfXMuolp1kIZ8M6d730lwY=",
+      "last_login": null,
+      "is_superuser": true,
+      "username": "kuchuk_admin",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-08-15T00:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$PHUwGv15ph3gbA5t1jfASB$S3VYm1bu1lgOm82Xoa6okNfXMuolp1kIZ8M6d730lwY=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "kuchuk_expert",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-08-15T00:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$PHUwGv15ph3gbA5t1jfASB$S3VYm1bu1lgOm82Xoa6okNfXMuolp1kIZ8M6d730lwY=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "dontsov",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-08-15T00:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$PHUwGv15ph3gbA5t1jfASB$S3VYm1bu1lgOm82Xoa6okNfXMuolp1kIZ8M6d730lwY=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "pugach",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-08-15T00:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "app.profile",
+    "fields": {
+      "user": ["kuchuk_admin"],
+      "full_name": "Кучук Егор Андреевич",
+      "age": 24,
+      "role": "admin"
+    }
+  },
+  {
+    "model": "app.profile",
+    "fields": {
+      "user": ["kuchuk_expert"],
+      "full_name": "Кучук Егор Андреевич",
+      "age": 24,
+      "role": "expert"
+    }
+  },
+  {
+    "model": "app.profile",
+    "fields": {
+      "user": ["dontsov"],
+      "full_name": "Донцов Илья Алексеевич",
+      "age": 22,
+      "role": "expert"
+    }
+  },
+  {
+    "model": "app.profile",
+    "fields": {
+      "user": ["pugach"],
+      "full_name": "Пугач Иван Иванович",
+      "age": 35,
+      "role": "expert"
+    }
+  }
+]

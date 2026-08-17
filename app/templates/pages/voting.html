@@ -1,0 +1,312 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-3">Голосование</h1>
+
+    <div id="switch-banner" class="alert alert-warning d-none mb-3">
+        Проект сменится через <strong id="switch-countdown"></strong> сек...
+    </div>
+
+    <div id="phase-banner" class="mb-3"></div>
+
+    <div id="nominations-section"></div>
+
+    <div id="project-section" class="card shadow-sm mt-4 d-none">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-3">
+                <h2 id="project-title" class="mb-0"></h2>
+                <a id="project-detail-link" href="#" class="btn btn-outline-secondary btn-sm">Подробнее</a>
+            </div>
+            <p class="text-muted" id="project-owner"></p>
+            <p id="project-description" style="white-space: pre-line;"></p>
+        </div>
+        <div id="project-images" class="p-3"></div>
+    </div>
+
+    <div id="jury-section" class="card shadow-sm mt-4 d-none">
+        <div class="card-header">Оценка жюри (1–10)</div>
+        <div class="card-body" id="jury-form"></div>
+    </div>
+
+    <div id="results-section" class="card shadow-sm mt-4">
+        <div class="card-header">Результаты</div>
+        <div class="card-body" id="results-box"></div>
+    </div>
+</div>
+
+{{ state|json_script:"voting-state" }}
+{{ own_project_id|json_script:"own-project-id" }}
+{{ can_jury|json_script:"can-jury" }}
+{{ can_see_results|json_script:"can-see-results" }}
+{{ csrf_token|json_script:"voting-csrf" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var PHASE_LABELS = {
+        'preparation': 'Подготовка',
+        'voting': 'Голосование',
+        'finished': 'Завершено',
+    };
+
+    var INITIAL_STATE = JSON.parse(document.getElementById('voting-state').textContent);
+    var OWN_PROJECT_ID = JSON.parse(document.getElementById('own-project-id').textContent);
+    var CAN_JURY = JSON.parse(document.getElementById('can-jury').textContent);
+    var CAN_SEE_RESULTS = JSON.parse(document.getElementById('can-see-results').textContent);
+    var CSRF_TOKEN = JSON.parse(document.getElementById('voting-csrf').textContent);
+    var UE_PLACEHOLDER = '{% static "img/ue_placeholder.png" %}';
+
+    var CRITERIA_LABELS = {
+        'technical': 'Техническая реализация',
+        'aesthetics': 'Эстетичность',
+        'playability': 'Играбельность',
+    };
+
+    var switchTimer = null;
+
+    function el(tag, cls, text) {
+        var node = document.createElement(tag);
+        if (cls) node.className = cls;
+        if (text !== undefined && text !== null) node.textContent = text;
+        return node;
+    }
+
+    function post(data) {
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = '/voting/';
+        var csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrfmiddlewaretoken';
+        csrf.value = CSRF_TOKEN;
+        form.appendChild(csrf);
+        Object.keys(data).forEach(function (key) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = data[key] === null || data[key] === undefined ? '' : data[key];
+            form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function startCountdown(deadlineStr) {
+        if (switchTimer) clearInterval(switchTimer);
+        var banner = document.getElementById('switch-banner');
+        var countdown = document.getElementById('switch-countdown');
+        var deadline = new Date(deadlineStr).getTime();
+
+        function tick() {
+            var left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+            countdown.textContent = String(left);
+            if (left <= 0) {
+                clearInterval(switchTimer);
+                switchTimer = null;
+                location.reload();
+            }
+        }
+        tick();
+        banner.classList.remove('d-none');
+        switchTimer = setInterval(tick, 500);
+    }
+
+    function render(state) {
+        if (state.pending_switch) {
+            startCountdown(state.pending_switch.deadline);
+        } else {
+            document.getElementById('switch-banner').classList.add('d-none');
+            if (switchTimer) { clearInterval(switchTimer); switchTimer = null; }
+        }
+
+        var banner = document.getElementById('phase-banner');
+        banner.innerHTML = '';
+        var badge = el('span', 'badge text-bg-' + (state.phase === 'voting' ? 'success' : state.phase === 'finished' ? 'secondary' : 'warning'));
+        badge.textContent = PHASE_LABELS[state.phase] || state.phase;
+        banner.appendChild(badge);
+
+        var section = document.getElementById('project-section');
+        if (!state.project) {
+            section.classList.add('d-none');
+            document.getElementById('nominations-section').innerHTML = '';
+            renderJuryForm(null, state.phase);
+            renderResults(null);
+            return;
+        }
+        section.classList.remove('d-none');
+        document.getElementById('project-title').textContent = state.project.title;
+        document.getElementById('project-owner').textContent = 'Автор: ' + state.project.owner;
+        document.getElementById('project-detail-link').href = '/projects/' + state.project.id + '/';
+
+        var images = document.getElementById('project-images');
+        images.innerHTML = '';
+        var urls = state.project.screenshots.length ? state.project.screenshots : [UE_PLACEHOLDER];
+
+        var mainImg = document.createElement('img');
+        mainImg.src = urls[0];
+        mainImg.alt = 'Скриншот';
+        mainImg.className = 'w-100';
+        mainImg.style.maxHeight = '420px';
+        mainImg.style.objectFit = 'contain';
+        mainImg.style.borderRadius = '6px';
+        mainImg.style.background = '#f0f0f0';
+        images.appendChild(mainImg);
+
+        if (urls.length > 1) {
+            var thumbRow = document.createElement('div');
+            thumbRow.className = 'd-flex gap-2 mt-2 overflow-auto';
+            urls.forEach(function (url) {
+                var thumb = document.createElement('img');
+                thumb.src = url;
+                thumb.alt = 'Миниатюра';
+                thumb.style.cssText = 'height:72px;width:auto;object-fit:cover;border-radius:4px;cursor:pointer;border:2px solid transparent;flex-shrink:0;';
+                thumb.addEventListener('click', function () {
+                    mainImg.src = url;
+                    thumbRow.querySelectorAll('img').forEach(function (t) { t.style.borderColor = 'transparent'; });
+                    thumb.style.borderColor = '#137FFC';
+                });
+                thumbRow.appendChild(thumb);
+            });
+            thumbRow.children[0].style.borderColor = '#137FFC';
+            images.appendChild(thumbRow);
+        }
+        document.getElementById('project-description').textContent = state.project.description;
+
+        renderNominations(state);
+        renderJuryForm(state.my_vote, state.phase);
+        renderResults(state);
+    }
+
+    function renderNominations(state) {
+        var container = document.getElementById('nominations-section');
+        container.innerHTML = '';
+        if (state.phase !== 'voting') {
+            container.appendChild(el('p', 'text-muted', 'Голосование пока не начато.'));
+            return;
+        }
+        if (state.project.id === OWN_PROJECT_ID) {
+            container.appendChild(el('div', 'alert alert-warning mb-0', 'Это ваш проект — голосовать за него нельзя.'));
+            return;
+        }
+
+        var row = el('div', 'd-flex flex-wrap gap-2 mb-3');
+        var myId = state.my_vote ? state.my_vote.nomination_id : undefined;
+
+        state.nominations.forEach(function (nom) {
+            var isSelected = (myId !== undefined && myId !== null && myId === nom.id);
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn ' + (isSelected ? 'btn-primary' : 'btn-outline-primary');
+            btn.innerHTML = nom.title + ' <span class="badge bg-light text-dark ms-1">' + nom.votes_count + '</span>';
+            btn.addEventListener('click', function () {
+                post({nomination_id: String(nom.id)});
+            });
+            row.appendChild(btn);
+        });
+
+        var noNomBtn = document.createElement('button');
+        noNomBtn.type = 'button';
+        var noNomSelected = (myId === null || myId === undefined) && state.my_vote;
+        noNomBtn.className = 'btn ' + (noNomSelected ? 'btn-secondary' : 'btn-outline-secondary');
+        noNomBtn.innerHTML = 'Без номинации <span class="badge bg-light text-dark ms-1">' + state.no_nomination.votes_count + '</span>';
+        noNomBtn.addEventListener('click', function () {
+            post({nomination_id: ''});
+        });
+        row.appendChild(noNomBtn);
+
+        container.appendChild(row);
+    }
+
+    function renderJuryForm(myVote, phase) {
+        var section = document.getElementById('jury-section');
+        var form = document.getElementById('jury-form');
+        form.innerHTML = '';
+        if (!CAN_JURY || phase !== 'voting' || !INITIAL_STATE.project || INITIAL_STATE.project.id === OWN_PROJECT_ID) {
+            section.classList.add('d-none');
+            return;
+        }
+        section.classList.remove('d-none');
+        Object.keys(CRITERIA_LABELS).forEach(function (key) {
+            var group = el('div', 'mb-2');
+            group.appendChild(el('label', 'form-label small mb-1', CRITERIA_LABELS[key]));
+            var select = document.createElement('select');
+            select.className = 'form-select form-select-sm';
+            select.dataset.criterion = key;
+            for (var i = 1; i <= 10; i++) {
+                var opt = document.createElement('option');
+                opt.value = String(i);
+                opt.textContent = String(i);
+                select.appendChild(opt);
+            }
+            group.appendChild(select);
+            form.appendChild(group);
+        });
+        var submit = document.createElement('button');
+        submit.type = 'button';
+        submit.className = 'btn btn-primary btn-sm';
+        submit.textContent = myVote ? 'Изменить оценку' : 'Оценить';
+        submit.addEventListener('click', function () {
+            var data = {nomination_id: myVote && myVote.nomination_id !== undefined && myVote.nomination_id !== null ? String(myVote.nomination_id) : ''};
+            form.querySelectorAll('select[data-criterion]').forEach(function (s) {
+                data['score_' + s.dataset.criterion] = s.value;
+            });
+            post(data);
+        });
+        form.appendChild(submit);
+    }
+
+    function renderResults(state) {
+        var section = document.getElementById('results-section');
+        if (!CAN_SEE_RESULTS) {
+            section.classList.add('d-none');
+            return;
+        }
+        section.classList.remove('d-none');
+        var box = document.getElementById('results-box');
+        box.innerHTML = '';
+        if (!state || !state.project) {
+            box.appendChild(el('p', 'text-muted mb-0', 'Проект не выбран.'));
+            return;
+        }
+
+        state.nominations.forEach(function (nom) {
+            var block = el('div', 'border-bottom pb-3 mb-3');
+            block.appendChild(el('h6', 'mb-2', nom.title));
+            var p = el('p', 'mb-0');
+            p.append('Голосов: ');
+            p.append(el('strong', null, String(nom.votes_count)));
+            block.appendChild(p);
+            box.appendChild(block);
+        });
+
+        var noNom = state.no_nomination;
+        var noBlock = el('div', 'mb-0');
+        noBlock.appendChild(el('h6', 'mb-2', 'Без номинации'));
+        var np = el('p', 'mb-0');
+        np.append('Голосов: ');
+        np.append(el('strong', null, String(noNom.votes_count)));
+        noBlock.appendChild(np);
+        box.appendChild(noBlock);
+    }
+
+    render(INITIAL_STATE);
+
+    var scheme = location.protocol === 'https:' ? 'wss://' : 'ws://';
+    var ws = new WebSocket(scheme + location.host + '/ws/voting/');
+    ws.onmessage = function (event) {
+        var message = JSON.parse(event.data);
+        if (message.type === 'state') {
+            render(message.data);
+        }
+    };
+    ws.onclose = function () {
+        setTimeout(function () {
+            location.reload();
+        }, 3000);
+    };
+})();
+</script>
+{% endblock %}

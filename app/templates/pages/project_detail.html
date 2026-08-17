@@ -1,0 +1,100 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'projects' %}">Проекты</a></li>
+            <li class="breadcrumb-item active">{{ project.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-3">
+                <h1 class="card-title mb-0">{{ project.title }}</h1>
+                {% if can_upload %}
+                    <a href="{% url 'project_edit' project.id %}" class="btn btn-outline-secondary btn-sm">Редактировать</a>
+                {% endif %}
+            </div>
+            <p class="text-muted">
+                Автор: {{ project.owner.profile.full_name|default:project.owner.username }}
+            </p>
+        </div>
+    </div>
+
+    <h5 class="mb-3">Галерея</h5>
+    <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
+        {% for screenshot in project.screenshots.all %}
+            <div class="col">
+                <div class="card shadow-sm screenshot-card" role="button" onclick="openLightbox('{{ screenshot.image.url }}')">
+                    <img src="{{ screenshot.image.url }}" class="card-img-top" alt="Скриншот {{ forloop.counter }}" style="height: 200px; object-fit: cover;">
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <img src="{% static 'img/ue_placeholder.png' %}" class="card-img-top" alt="Нет скриншотов" style="max-height: 300px; object-fit: cover;">
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if can_upload %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">Добавить скриншот</div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <input type="file" name="image" accept="image/*" class="form-control form-control-sm" required>
+                        <button type="submit" class="btn btn-primary btn-sm text-nowrap">Загрузить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5>Описание</h5>
+            <p class="card-text" style="white-space: pre-line;">{{ project.description }}</p>
+        </div>
+    </div>
+</div>
+
+<div id="lightbox" class="lightbox-overlay d-none" onclick="closeLightbox()">
+    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    <img id="lightbox-img" src="" alt="Скриншот">
+</div>
+
+<style>
+    .screenshot-card { transition: transform 0.2s; border: 2px solid transparent; }
+    .screenshot-card:hover { transform: scale(1.03); border-color: #137FFC; }
+    .lightbox-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 9999; cursor: zoom-out;
+    }
+    .lightbox-overlay img {
+        max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    }
+    .lightbox-close {
+        position: absolute; top: 20px; right: 30px;
+        color: #fff; font-size: 2.5rem; cursor: pointer; line-height: 1;
+    }
+</style>
+<script>
+function openLightbox(url) {
+    document.getElementById('lightbox-img').src = url;
+    document.getElementById('lightbox').classList.remove('d-none');
+}
+function closeLightbox() {
+    document.getElementById('lightbox').classList.add('d-none');
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+});
+</script>
+{% endblock %}

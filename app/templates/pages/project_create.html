@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'projects' %}">Проекты</a></li>
+            <li class="breadcrumb-item active">Новый проект</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header">Создание проекта</div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Название</label>
+                            <input type="text" name="title" id="title" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Описание</label>
+                            <textarea name="description" id="description" class="form-control" rows="6"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                        <a href="{% url 'projects' %}" class="btn btn-outline-secondary">Отмена</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

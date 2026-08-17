@@ -1,0 +1,56 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'projects' %}">Проекты</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'project_detail' project.id %}">{{ project.title }}</a></li>
+            <li class="breadcrumb-item active">Редактирование</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header">Редактирование проекта</div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Название</label>
+                            <input type="text" name="title" id="title" class="form-control" value="{{ project.title }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Описание</label>
+                            <textarea name="description" id="description" class="form-control" rows="6">{{ project.description }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <a href="{% url 'project_detail' project.id %}" class="btn btn-outline-secondary">Отмена</a>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header">Скриншоты</div>
+                <div class="card-body">
+                    {% for screenshot in project.screenshots.all %}
+                        <div class="d-flex align-items-center gap-3 mb-3 p-2 border rounded">
+                            <img src="{{ screenshot.image.url }}" alt="Скриншот" style="height: 80px; object-fit: cover; border-radius: 4px;">
+                            <div class="flex-grow-1">
+                                <small class="text-muted">Загружен {{ screenshot.uploaded_at|date:"d.m.Y H:i" }}</small>
+                            </div>
+                            <form method="post" action="{% url 'screenshot_delete' project.id screenshot.id %}" onsubmit="return confirm('Удалить скриншот?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
+                            </form>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted mb-0">Скриншотов нет.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
