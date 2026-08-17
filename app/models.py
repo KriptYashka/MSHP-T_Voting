@@ -1,8 +1,11 @@
+import django
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
+
+_CHECK_KWARG = 'condition' if django.VERSION >= (5, 1) else 'check'
 
 
 class Role(models.TextChoices):
@@ -194,7 +197,7 @@ class Vote(models.Model):
                 name='one_vote_per_user_project',
             ),
             models.CheckConstraint(
-                condition=(
+                **{_CHECK_KWARG: (
                     Q(
                         score_technical__isnull=True,
                         score_aesthetics__isnull=True,
@@ -205,8 +208,7 @@ class Vote(models.Model):
                         score_aesthetics__isnull=False,
                         score_playability__isnull=False,
                     )
-                ),
-                name='scores_all_or_none',
+                ), 'name': 'scores_all_or_none'},
             ),
         ]
 
