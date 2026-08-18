@@ -471,6 +471,16 @@ def admin_panel(request):
                 status = 'заблокирован' if project.locked else 'разблокирован'
                 messages.success(request, f'Проект «{project.title}» {status}')
 
+        elif action == 'delete_project':
+            project_id = request.POST.get('project_id')
+            project = Project.objects.filter(id=project_id).first()
+            if project:
+                title = project.title
+                for s in project.screenshots.all():
+                    s.image.delete(save=False)
+                project.delete()
+                messages.success(request, f'Проект «{title}» удалён')
+
         return redirect('admin_panel')
 
     vs = VotingState.load()
