@@ -12,7 +12,7 @@
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex flex-wrap align-items-center gap-2">
                 <h1 class="card-title mb-0">{{ project.title }}</h1>
                 {% if can_edit %}
                     <a href="{% url 'project_edit' project.id %}" class="btn btn-outline-secondary btn-sm">Редактировать</a>
@@ -54,7 +54,7 @@
             <div class="card-body">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <div class="d-flex gap-2">
+                    <div class="d-flex flex-wrap gap-2">
                         <input type="file" name="image" accept="image/*" class="form-control form-control-sm" required>
                         <button type="submit" class="btn btn-primary btn-sm text-nowrap">Загрузить</button>
                     </div>

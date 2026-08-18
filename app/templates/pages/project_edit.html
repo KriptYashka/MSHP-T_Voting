@@ -35,7 +35,7 @@
                 <div class="card-header">Скриншоты</div>
                 <div class="card-body">
                     {% for screenshot in project.screenshots.all %}
-                        <div class="d-flex align-items-center gap-3 mb-3 p-2 border rounded">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-3 p-2 border rounded">
                             <img src="{{ screenshot.image.url }}" alt="Скриншот" style="height: 80px; object-fit: cover; border-radius: 4px;">
                             <div class="flex-grow-1">
                                 <small class="text-muted">Загружен {{ screenshot.uploaded_at|date:"d.m.Y H:i" }}</small>

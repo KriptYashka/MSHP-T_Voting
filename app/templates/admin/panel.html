@@ -69,37 +69,39 @@
 
                     <ul class="list-group">
                         {% for project in projects %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    {{ project.title }}
-                                    {% if project.locked %}
-                                        <span class="badge bg-warning text-dark ms-1">Заблокирован</span>
-                                    {% endif %}
-                                    <div class="text-muted small">{{ project.owner.profile.full_name|default:project.owner.username }}</div>
-                                </div>
-                                <div class="d-flex gap-1">
-                                    <form method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="toggle_lock">
-                                        <input type="hidden" name="project_id" value="{{ project.id }}">
-                                        <button type="submit" class="btn btn-sm {% if project.locked %}btn-warning{% else %}btn-outline-warning{% endif %}">
-                                            {% if project.locked %}Разблокировать{% else %}Заблокировать{% endif %}
-                                        </button>
-                                    </form>
-                                    <form method="post" onsubmit="return confirm('Удалить проект «{{ project.title }}»?')">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="delete_project">
-                                        <input type="hidden" name="project_id" value="{{ project.id }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
-                                    </form>
-                                    <form method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="set_current_project">
-                                        <input type="hidden" name="project_id" value="{{ project.id }}">
-                                        <button type="submit" class="btn btn-sm {% if current_project.id == project.id %}btn-success{% else %}btn-outline-primary{% endif %}">
-                                            {% if current_project.id == project.id %}Голосуется{% else %}Показывать{% endif %}
-                                        </button>
-                                    </form>
+                            <li class="list-group-item">
+                                <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2">
+                                    <div>
+                                        {{ project.title }}
+                                        {% if project.locked %}
+                                            <span class="badge bg-warning text-dark ms-1">Заблокирован</span>
+                                        {% endif %}
+                                        <div class="text-muted small">{{ project.owner.profile.full_name|default:project.owner.username }}</div>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="toggle_lock">
+                                            <input type="hidden" name="project_id" value="{{ project.id }}">
+                                            <button type="submit" class="btn btn-sm {% if project.locked %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                                                {% if project.locked %}Разблокировать{% else %}Заблокировать{% endif %}
+                                            </button>
+                                        </form>
+                                        <form method="post" onsubmit="return confirm('Удалить проект «{{ project.title }}»?')">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete_project">
+                                            <input type="hidden" name="project_id" value="{{ project.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                        </form>
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="set_current_project">
+                                            <input type="hidden" name="project_id" value="{{ project.id }}">
+                                            <button type="submit" class="btn btn-sm {% if current_project.id == project.id %}btn-success{% else %}btn-outline-primary{% endif %}">
+                                                {% if current_project.id == project.id %}Голосуется{% else %}Показывать{% endif %}
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </li>
                         {% empty %}
@@ -162,26 +164,26 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="edit_user">
                                     {{ edit_form.user_id }}
-                                    <div class="col-md-4">
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label small">ФИО</label>
                                         {{ edit_form.full_name }}
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-6 col-md-2">
                                         <label class="form-label small">Возраст</label>
                                         {{ edit_form.age }}
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-6 col-md-2">
                                         <label class="form-label small">Роль</label>
                                         {{ edit_form.role }}
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-6 col-md-2">
                                         <label class="form-label small">Новый пароль</label>
                                         <div class="input-group input-group-sm">
                                             <input type="password" name="password" class="form-control form-control-sm" placeholder="Без изменений">
                                             <button type="button" class="btn btn-outline-secondary" onclick="generateForField(this)" title="Сгенерировать">&#x21bb;</button>
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-12 col-md-2">
                                         <button type="submit" class="btn btn-primary btn-sm w-100">Сохранить</button>
                                     </div>
                                 </form>

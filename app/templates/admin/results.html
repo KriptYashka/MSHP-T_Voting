@@ -25,44 +25,46 @@
                  id="panel-{{ forloop.counter }}" role="tabpanel">
                 <div class="card shadow-sm">
                     <div class="card-body p-0">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                            <tr>
-                                <th style="width: 50px;">#</th>
-                                <th>Проект</th>
-                                <th>Автор</th>
-                                <th class="text-center">Голосов</th>
-                                <th class="text-center">Оценок жюри</th>
-                                <th class="text-center">Техническая</th>
-                                <th class="text-center">Эстетичность</th>
-                                <th class="text-center">Играбельность</th>
-                                <th class="text-center">Средний балл</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for row in tab.rows %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
                                 <tr>
-                                    <td>
-                                        <span class="badge text-bg-{% if row.rank == 1 %}warning{% elif row.rank == 2 %}secondary{% elif row.rank == 3 %}danger{% else %}light text-dark{% endif %}">
-                                            {{ row.rank }}
-                                        </span>
-                                    </td>
-                                    <td><strong>{{ row.project.title }}</strong></td>
-                                    <td>{{ row.owner }}</td>
-                                    <td class="text-center"><span class="badge text-bg-primary">{{ row.votes_count }}</span></td>
-                                    <td class="text-center">{{ row.jury_count }}</td>
-                                    <td class="text-center">{{ row.criteria.technical }}</td>
-                                    <td class="text-center">{{ row.criteria.aesthetics }}</td>
-                                    <td class="text-center">{{ row.criteria.playability }}</td>
-                                    <td class="text-center"><strong>{{ row.overall }}</strong></td>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Проект</th>
+                                    <th>Автор</th>
+                                    <th class="text-center">Голосов</th>
+                                    <th class="text-center">Оценок жюри</th>
+                                    <th class="text-center">Техн.</th>
+                                    <th class="text-center">Эстет.</th>
+                                    <th class="text-center">Играб.</th>
+                                    <th class="text-center">Средний</th>
                                 </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="9" class="text-muted text-center py-4">Голосов пока нет.</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                {% for row in tab.rows %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge text-bg-{% if row.rank == 1 %}warning{% elif row.rank == 2 %}secondary{% elif row.rank == 3 %}danger{% else %}light text-dark{% endif %}">
+                                                {{ row.rank }}
+                                            </span>
+                                        </td>
+                                        <td><strong>{{ row.project.title }}</strong></td>
+                                        <td>{{ row.owner }}</td>
+                                        <td class="text-center"><span class="badge text-bg-primary">{{ row.votes_count }}</span></td>
+                                        <td class="text-center">{{ row.jury_count }}</td>
+                                        <td class="text-center">{{ row.criteria.technical }}</td>
+                                        <td class="text-center">{{ row.criteria.aesthetics }}</td>
+                                        <td class="text-center">{{ row.criteria.playability }}</td>
+                                        <td class="text-center"><strong>{{ row.overall }}</strong></td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="9" class="text-muted text-center py-4">Голосов пока нет.</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
