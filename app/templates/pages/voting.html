@@ -27,7 +27,24 @@
 
     <div id="jury-section" class="card shadow-sm mt-4 d-none">
         <div class="card-header">Оценка жюри (1–10)</div>
-        <div class="card-body" id="jury-form"></div>
+        <div class="card-body">
+            <div class="mb-3 p-2 rounded" style="background: #f8f9fa;">
+                <small class="text-muted d-block mb-1"><strong>Шкала оценок:</strong></small>
+                <div class="d-flex flex-wrap gap-1">
+                    <span class="badge" style="background: #dc3545;">1–3</span>
+                    <small class="text-muted align-self-center">Плохо</small>
+                    <span class="badge" style="background: #fd7e14;">4–5</span>
+                    <small class="text-muted align-self-center">Удовл.</small>
+                    <span class="badge" style="background: #ffc107; color: #000;">6–7</span>
+                    <small class="text-muted align-self-center">Хорошо</small>
+                    <span class="badge" style="background: #198754;">8–9</span>
+                    <small class="text-muted align-self-center">Отлично</small>
+                    <span class="badge" style="background: #0d6efd;">10</span>
+                    <small class="text-muted align-self-center">Шедевр</small>
+                </div>
+            </div>
+            <div id="jury-form"></div>
+        </div>
     </div>
 
     <div id="results-section" class="card shadow-sm mt-4">
@@ -200,7 +217,7 @@
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'btn ' + (isSelected ? 'btn-primary' : 'btn-outline-primary');
-            btn.innerHTML = nom.title + ' <span class="badge bg-light text-dark ms-1">' + nom.votes_count + '</span>';
+            btn.textContent = nom.title;
             btn.addEventListener('click', function () {
                 post({nomination_id: String(nom.id)});
             });
@@ -211,7 +228,7 @@
         noNomBtn.type = 'button';
         var noNomSelected = (myId === null || myId === undefined) && state.my_vote;
         noNomBtn.className = 'btn ' + (noNomSelected ? 'btn-secondary' : 'btn-outline-secondary');
-        noNomBtn.innerHTML = 'Без номинации <span class="badge bg-light text-dark ms-1">' + state.no_nomination.votes_count + '</span>';
+        noNomBtn.textContent = 'Без номинации';
         noNomBtn.addEventListener('click', function () {
             post({nomination_id: ''});
         });
