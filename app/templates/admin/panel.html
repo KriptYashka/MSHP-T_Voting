@@ -12,7 +12,15 @@
                     <form method="post">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="create_user">
-                        {{ user_form.as_p }}
+                        {% for field in user_form %}
+                            <div class="mb-3">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% for e in field.errors %}
+                                    <div class="text-danger small">{{ e }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
                         <div class="mb-3">
                             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="generatePassword()">
                                 Сгенерировать пароль
@@ -29,7 +37,15 @@
                     <form method="post">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="create_nomination">
-                        {{ nomination_form.as_p }}
+                        {% for field in nomination_form %}
+                            <div class="mb-3">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% for e in field.errors %}
+                                    <div class="text-danger small">{{ e }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
                         <button type="submit" class="btn btn-primary w-100">Создать</button>
                     </form>
                 </div>
@@ -41,7 +57,15 @@
                     <form method="post">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="create_project">
-                        {{ project_form.as_p }}
+                        {% for field in project_form %}
+                            <div class="mb-3">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% for e in field.errors %}
+                                    <div class="text-danger small">{{ e }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
                         <button type="submit" class="btn btn-primary w-100">Создать</button>
                     </form>
                 </div>
@@ -70,7 +94,7 @@
                     <ul class="list-group">
                         {% for project in projects %}
                             <li class="list-group-item">
-                                <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2">
+                                <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-start gap-2">
                                     <div>
                                         {{ project.title }}
                                         {% if project.locked %}
@@ -114,7 +138,7 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-header">Фаза голосования</div>
                 <div class="card-body">
-                    <div class="btn-group">
+                    <div class="d-flex flex-wrap gap-2">
                         {% for value, label in phases %}
                             <form method="post" class="d-inline">
                                 {% csrf_token %}
@@ -128,15 +152,48 @@
             </div>
 
             <div class="card shadow-sm mb-4">
-                <div class="card-header">Номинации</div>
-                <div class="card-body">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    Номинации
+                    <span class="badge text-bg-secondary">{{ nominations|length }}</span>
+                </div>
+                <div class="list-group list-group-flush">
                     {% for nom in nominations %}
-                        <div class="border rounded p-3 mb-2">
-                            <strong>{{ nom.title }}</strong>
-                            <div class="text-muted small">{{ nom.criteria }}</div>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong>{{ nom.title }}</strong>
+                                    <div class="text-muted small">{{ nom.criteria|truncatewords:15 }}</div>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-outline-secondary" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#edit-nom-{{ nom.id }}">
+                                        Редактировать
+                                    </button>
+                                    <form method="post" onsubmit="return confirm('Удалить номинацию «{{ nom.title }}»?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_nomination">
+                                        <input type="hidden" name="nomination_id" value="{{ nom.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="edit-nom-{{ nom.id }}" class="collapse">
+                                <form method="post" class="mt-2">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="edit_nomination">
+                                    <input type="hidden" name="nomination_id" value="{{ nom.id }}">
+                                    <div class="mb-2">
+                                        <input type="text" name="title" class="form-control form-control-sm" value="{{ nom.title }}" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <textarea name="criteria" class="form-control form-control-sm" rows="2">{{ nom.criteria }}</textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">Сохранить</button>
+                                </form>
+                            </div>
                         </div>
                     {% empty %}
-                        <p class="text-muted mb-0">Номинаций пока нет.</p>
+                        <div class="list-group-item text-muted">Номинаций пока нет.</div>
                     {% endfor %}
                 </div>
             </div>
@@ -154,10 +211,18 @@
                                     <strong>{{ u.username }}</strong>
                                     <span class="badge text-bg-{% if u.profile.role == 'admin' %}danger{% elif u.profile.role == 'expert' %}info{% else %}secondary{% endif %} ms-1">{{ u.profile.get_role_display }}</span>
                                 </div>
-                                <button class="btn btn-sm btn-outline-secondary" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#edit-user-{{ u.id }}">
-                                    Редактировать
-                                </button>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-outline-secondary" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#edit-user-{{ u.id }}">
+                                        Редактировать
+                                    </button>
+                                    <form method="post" onsubmit="return confirm('Удалить пользователя «{{ u.username }}»?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_user">
+                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                    </form>
+                                </div>
                             </div>
                             <div id="edit-user-{{ u.id }}" class="collapse">
                                 <form method="post" class="row g-2 align-items-end mt-1">

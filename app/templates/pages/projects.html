@@ -34,7 +34,7 @@
                     </div>
                 </div>
             </div>
-        {% else %}
+        {% elif user.is_authenticated %}
             <div class="col">
                 <a href="{% url 'project_create' %}" class="text-decoration-none">
                     <div class="card h-100 shadow-sm border-secondary border-dashed d-flex align-items-center justify-content-center" style="min-height: 320px; border-style: dashed !important; opacity: 0.7;">

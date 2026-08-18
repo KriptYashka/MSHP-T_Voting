@@ -125,12 +125,13 @@ def profile_page(request):
     })
 
 
-@login_required
 def projects_list(request):
-    own_project = getattr(request.user, 'project', None)
+    own_project = None
+    if request.user.is_authenticated:
+        own_project = getattr(request.user, 'project', None)
     other_projects = Project.objects.select_related('owner__profile').exclude(
         owner=request.user,
-    )
+    ) if request.user.is_authenticated else Project.objects.select_related('owner__profile').all()
 
     vs = VotingState.load()
     vs.apply_pending_if_expired()
@@ -145,14 +146,13 @@ def projects_list(request):
     })
 
 
-@login_required
 def project_detail(request, project_id):
     project = get_object_or_404(
         Project.objects.select_related('owner__profile'),
         id=project_id,
     )
-    role = get_role(request.user)
-    is_owner = hasattr(request.user, 'project') and request.user.project.id == project.id
+    role = get_role(request.user) if request.user.is_authenticated else None
+    is_owner = request.user.is_authenticated and hasattr(request.user, 'project') and request.user.project.id == project.id
     can_upload = role == Role.ADMIN or (is_owner and not project.locked)
     can_edit = role == Role.ADMIN or (is_owner and not project.locked)
 
@@ -480,6 +480,40 @@ def admin_panel(request):
                     s.image.delete(save=False)
                 project.delete()
                 messages.success(request, f'Проект «{title}» удалён')
+
+        elif action == 'edit_nomination':
+            nom_id = request.POST.get('nomination_id')
+            nom = Nomination.objects.filter(id=nom_id).first()
+            if nom:
+                title = request.POST.get('title', '').strip()
+                criteria = request.POST.get('criteria', '').strip()
+                if title:
+                    nom.title = title
+                    nom.criteria = criteria
+                    nom.save()
+                    messages.success(request, f'Номинация «{title}» обновлена')
+                else:
+                    messages.error(request, 'Название не может быть пустым')
+
+        elif action == 'delete_nomination':
+            nom_id = request.POST.get('nomination_id')
+            nom = Nomination.objects.filter(id=nom_id).first()
+            if nom:
+                title = nom.title
+                nom.delete()
+                messages.success(request, f'Номинация «{title}» удалена')
+
+        elif action == 'delete_user':
+            user_id = request.POST.get('user_id')
+            target = User.objects.filter(id=user_id, is_superuser=False).first()
+            if target:
+                username = target.username
+                if hasattr(target, 'project'):
+                    for s in target.project.screenshots.all():
+                        s.image.delete(save=False)
+                    target.project.delete()
+                target.delete()
+                messages.success(request, f'Пользователь «{username}» удалён')
 
         return redirect('admin_panel')
 

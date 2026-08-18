@@ -5,11 +5,26 @@ from .models import Role
 
 
 class UserCreateForm(forms.Form):
-    username = forms.CharField(label='Логин', max_length=150)
-    password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
-    full_name = forms.CharField(label='ФИО', max_length=255)
-    age = forms.IntegerField(label='Возраст', min_value=1, max_value=150, required=False)
-    role = forms.ChoiceField(label='Роль', choices=Role.choices)
+    username = forms.CharField(
+        label='Логин', max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+    password = forms.CharField(
+        label='Пароль',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+    )
+    full_name = forms.CharField(
+        label='ФИО', max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+    age = forms.IntegerField(
+        label='Возраст', min_value=1, max_value=150, required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control'}),
+    )
+    role = forms.ChoiceField(
+        label='Роль', choices=Role.choices,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
 
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -41,17 +56,30 @@ class UserEditForm(forms.Form):
 
 
 class NominationCreateForm(forms.Form):
-    title = forms.CharField(label='Название', max_length=255)
-    criteria = forms.CharField(label='Критерии', widget=forms.Textarea)
+    title = forms.CharField(
+        label='Название', max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+    criteria = forms.CharField(
+        label='Критерии',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+    )
 
 
 class ProjectCreateForm(forms.Form):
     owner = forms.ModelChoiceField(
         label='Разработчик',
         queryset=User.objects.none(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
     )
-    title = forms.CharField(label='Название', max_length=255)
-    description = forms.CharField(label='Описание', widget=forms.Textarea)
+    title = forms.CharField(
+        label='Название', max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+    description = forms.CharField(
+        label='Описание',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
